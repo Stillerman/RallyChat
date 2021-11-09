@@ -21,7 +21,7 @@ function App() {
       setChatMemers(mems)
     })
 
-    socketFresh.on("set ident", function(newIdent) {
+    socketFresh.on("set ident", function (newIdent) {
       setIdent(newIdent)
     })
 
@@ -37,17 +37,22 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className="App chat">
       <p>{chatMembers.join(", ")}</p>
       <ul id="messages">
         {
           hist.map(entry => <li>
-            {entry.user}: {entry.message}
+            <div className={(entry.user == ident ? "mine" : "yours") + " messages"}>
+              {entry.user}
+              <div className="message last">
+                {entry.message}
+              </div>
+            </div>
           </li>)
         }
       </ul>
       <form id="form" action="" onSubmit={e => e.preventDefault()}>
-        <span id="identity" style={{fontSize: "2rem", padding: "0 0.5rem"}} onClick={newIdent}>{ident}</span>
+        <span id="identity" style={{ fontSize: "2rem", padding: "0 0.5rem" }} onClick={newIdent}>{ident}</span>
         <input id="input" autocomplete="off" value={messageContent} onChange={e => setMessageContent(e.target.value)} />
         <button onClick={send}>Send</button>
       </form>
