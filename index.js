@@ -7,9 +7,7 @@ const { Server } = require("socket.io");
 const getRandomEmoji = require('get-random-emoji');
 const io = new Server(server);
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
+app.use('/', express.static(__dirname + '/ui/build/'))
 
 let people = {}
 let messages = []
@@ -26,7 +24,7 @@ io.on('connection', (socket) => {
   people[socket.id] = getRandomEmoji()
   io.emit('chat hist', messages);
   socket.emit("set ident", people[socket.id])
-
+  io.emit("members", Object.values(people))
 
   socket.on('chat message', (msg) => {
     addMessage(msg, socket)
@@ -36,6 +34,13 @@ io.on('connection', (socket) => {
   socket.on('new ident', () => {
     people[socket.id] = getRandomEmoji()
     socket.emit("set ident", people[socket.id])
+    io.emit("members", Object.values(people))
+
+  })
+
+  socket.on('disconnect', () => {
+    delete people[socket.id]
+    io.emit("members", Object.values(people))
   })
 });
 
