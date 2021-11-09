@@ -1,0 +1,12 @@
+{
+  "name": "rally-chat",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "4",
+    "faker": "^5.5.3",
+    "get-random-emoji": "^1.0.0",
+    "socket.io": "^4.3.2"
+  }
+}
