@@ -1,28 +1,24 @@
 import { SocketContext } from './context/socket';
 import { useEffect, useState, useContext } from 'react';
+import { Container, Input, IconButton, Button, Flex, useColorMode, Heading } from '@chakra-ui/react';
 
 function Anarchy() {
   const [hist, setHist] = useState([])
   const [ident, setIdent] = useState("No")
   const [messageContent, setMessageContent] = useState("")
   const [chatMembers, setChatMemers] = useState([])
-
   const socket = useContext(SocketContext);
 
   useEffect(() => {
-
     socket.on('chat hist', function (hist) {
       setHist(hist)
     });
-
     socket.on("members", mems => {
       setChatMemers(mems)
     })
-
     socket.on("set ident", function (newIdent) {
       setIdent(newIdent)
     })
-
   }, [])
 
   function send() {
@@ -35,26 +31,42 @@ function Anarchy() {
   }
 
   return (
-    <div className="App chat">
-      <p>{chatMembers.join(", ")}</p>
-      <ul id="messages">
+    <Container>
+      <Flex>
+        <Heading size="lg">Big 'ol Groupchat</Heading>
         {
-          hist.map(entry => <li>
-            <div className={(entry.user == ident ? "mine" : "yours") + " messages"}>
-              {entry.user}
-              <div className="message last">
-                {entry.message}
-              </div>
-            </div>
-          </li>)
+          chatMembers.map(mem => <span style={{ marginLeft: "1", fontSize: "2rem" }}>{mem}</span>)
         }
-      </ul>
-      <form id="form" action="" onSubmit={e => e.preventDefault()}>
-        <span id="identity" style={{ fontSize: "2rem", padding: "0 0.5rem" }} onClick={newIdent}>{ident}</span>
-        <input id="input" autocomplete="off" value={messageContent} onChange={e => setMessageContent(e.target.value)} />
-        <button onClick={send}>Send</button>
-      </form>
-    </div>
+      </Flex>
+      <div>
+        <ul id="messages">
+          {
+            hist.map(entry => <li>
+              <div className={(entry.user == ident ? "mine" : "yours") + " messages"}>
+                {entry.user}
+                <div className="message last">
+                  {entry.message}
+                </div>
+              </div>
+            </li>)
+          }
+        </ul>
+
+        <Flex>
+          <IconButton
+            aria-label="Change Icon"
+            onClick={newIdent}
+            icon={
+              <span style={{ fontSize: "2rem", padding: "0 0.5rem" }}>
+                {ident}
+              </span>
+            }
+          />
+          <Input flex="1" mx="2" placeholder="Basic usage" value={messageContent} onChange={e => setMessageContent(e.target.value)} />
+          <Button onClick={send}>Send</Button>
+        </Flex>
+      </div>
+    </Container>
   );
 }
 
