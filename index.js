@@ -1,11 +1,12 @@
 const express = require('express');
 const app = express();
 const http = require('http');
-const faker = require("faker")
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const getRandomEmoji = require('get-random-emoji');
-const io = new Server(server);
+const io = new Server(server, {  cors: {
+  origin: '*',
+}});
 
 app.use('/', express.static(__dirname + '/ui/build/'))
 
