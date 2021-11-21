@@ -1,10 +1,9 @@
 import { SocketContext } from './context/socket';
 import { useEffect, useState, useContext } from 'react';
-import { Container, Input, IconButton, Button, Flex, useColorMode, Heading } from '@chakra-ui/react';
+import { Container, Input, IconButton, Button, Flex, useColorMode, Heading, Icon } from '@chakra-ui/react';
 
-function Anarchy() {
+function Anarchy({ident}) {
   const [hist, setHist] = useState([])
-  const [ident, setIdent] = useState("No")
   const [messageContent, setMessageContent] = useState("")
   const [chatMembers, setChatMemers] = useState([])
   const socket = useContext(SocketContext);
@@ -12,18 +11,19 @@ function Anarchy() {
   useEffect(() => {
     socket.on('chat hist', function (hist) {
       setHist(hist)
-    });
+    })
     socket.on("members", mems => {
       setChatMemers(mems)
-    })
-    socket.on("set ident", function (newIdent) {
-      setIdent(newIdent)
     })
   }, [])
 
   function send() {
     socket.emit("chat message", messageContent)
     setMessageContent("")
+  }
+
+  function changeMode(newMode) {
+    socket.emit("change mode", newMode)
   }
 
   function newIdent() {
@@ -33,9 +33,10 @@ function Anarchy() {
   return (
     <Container>
       <Flex>
+        <Button onClick={() => changeMode("lob")}>Back</Button>
         <Heading size="lg">Big 'ol Groupchat</Heading>
         {
-          chatMembers.map(mem => <span style={{ marginLeft: "1", fontSize: "2rem" }}>{mem}</span>)
+          chatMembers.map(mem => <span style={{ marginLeft: "1", fontSize: "2rem" }}>{mem.emoji}</span>)
         }
       </Flex>
       <div>
@@ -43,7 +44,7 @@ function Anarchy() {
           {
             hist.map(entry => <li>
               <div className={(entry.user == ident ? "mine" : "yours") + " messages"}>
-                {entry.user}
+                {entry.user.emoji} {entry.user.room}
                 <div className="message last">
                   {entry.message}
                 </div>
@@ -58,7 +59,7 @@ function Anarchy() {
             onClick={newIdent}
             icon={
               <span style={{ fontSize: "2rem", padding: "0 0.5rem" }}>
-                {ident}
+                {ident.emoji}
               </span>
             }
           />

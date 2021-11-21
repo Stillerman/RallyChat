@@ -8,7 +8,7 @@ import theme from './theme'
 
 ReactDOM.render(
   <React.StrictMode>
-    <ColorModeScript initialColorMode={"light"} />
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <App />
   </React.StrictMode>,
   document.getElementById('root')
