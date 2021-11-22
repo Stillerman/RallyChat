@@ -37,7 +37,7 @@ function Anarchy({ ident }) {
       <Flex>
         <Button onClick={backToLobby}>Back</Button>
         <Heading size="lg">
-          Big 'ol Groupchat - {anarchyState?.userCount || "..."} user(s))
+          Big 'ol Groupchat - {anarchyState?.userCount || "..."} user(s)
         </Heading>
       </Flex>
       <div>

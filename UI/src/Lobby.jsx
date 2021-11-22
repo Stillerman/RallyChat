@@ -33,7 +33,6 @@ const Lobby = () => {
       <Heading size="md">Hello, {ident.emoji}</Heading>
       <Button my="2" onClick={() => changeMode("anarchy")}>Big 'ol Group Chat</Button>
       <Button my="2" onClick={() => changeMode("ooo")}>One-on-one Chat</Button>
-      <Button my="2" onClick={() => changeMode("ss")}>Secret Surresh</Button>
     </Flex>
   </Container>
   }
