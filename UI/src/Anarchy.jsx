@@ -1,69 +1,80 @@
-import { SocketContext } from './context/socket';
-import { useEffect, useState, useContext } from 'react';
-import { Container, Input, IconButton, Button, Flex, useColorMode, Heading, Icon } from '@chakra-ui/react';
-
-function Anarchy({ident}) {
-  const [hist, setHist] = useState([])
-  const [messageContent, setMessageContent] = useState("")
-  const [chatMembers, setChatMemers] = useState([])
+import { SocketContext } from "./context/socket";
+import { useEffect, useState, useContext } from "react";
+import {
+  Container,
+  Input,
+  IconButton,
+  Button,
+  Flex,
+  Heading,
+  Icon,
+  List,
+  ListItem,
+  ListIcon,
+} from "@chakra-ui/react";
+function Anarchy({ ident }) {
+  const [anarchyState, setAnarchyState] = useState({});
+  const [messageContent, setMessageContent] = useState("");
   const socket = useContext(SocketContext);
 
   useEffect(() => {
-    socket.on('chat hist', function (hist) {
-      setHist(hist)
-    })
-    socket.on("members", mems => {
-      setChatMemers(mems)
-    })
-  }, [])
+    socket.on("anarchy:updateState", function (state) {
+      setAnarchyState(state);
+    });
+  }, []);
 
   function send() {
-    socket.emit("chat message", messageContent)
-    setMessageContent("")
+    socket.emit("anarchy:send_msg", messageContent);
+    setMessageContent("");
   }
 
-  function changeMode(newMode) {
-    socket.emit("change mode", newMode)
-  }
-
-  function newIdent() {
-    socket.emit("new ident")
+  function backToLobby() {
+    socket.emit("modeChange", "lobby")
   }
 
   return (
     <Container>
       <Flex>
-        <Button onClick={() => changeMode("lob")}>Back</Button>
-        <Heading size="lg">Big 'ol Groupchat</Heading>
-        {
-          chatMembers.map(mem => <span style={{ marginLeft: "1", fontSize: "2rem" }}>{mem.emoji}</span>)
-        }
+        <Button onClick={backToLobby}>Back</Button>
+        <Heading size="lg">
+          Big 'ol Groupchat - {anarchyState?.userCount || "..."} user(s))
+        </Heading>
       </Flex>
       <div>
-        <ul id="messages">
+        <List spacing={3}>
           {
-            hist.map(entry => <li>
-              <div className={(entry.user == ident ? "mine" : "yours") + " messages"}>
-                {entry.user.emoji} {entry.user.room}
-                <div className="message last">
-                  {entry.message}
-                </div>
-              </div>
-            </li>)
+            anarchyState?.events?.map(event => {
+              if (event.type == "user entered") {
+                return <ListItem textAlign="center">{event.name} has entered the room.</ListItem>
+              }
+
+              if (event.type == "user left") {
+                return <ListItem textAlign="center">{event.name} has left the room.</ListItem>
+              }
+
+              if (event.type == "message") {
+                return <ListItem>{event.user} {event.message}</ListItem>
+              }
+            })
           }
-        </ul>
+        </List>
 
         <Flex>
           <IconButton
             aria-label="Change Icon"
-            onClick={newIdent}
             icon={
               <span style={{ fontSize: "2rem", padding: "0 0.5rem" }}>
                 {ident.emoji}
               </span>
             }
           />
-          <Input flex="1" mx="2" placeholder="Basic usage" value={messageContent} onChange={e => setMessageContent(e.target.value)} />
+          <Input
+            flex="1"
+            mx="2"
+            placeholder="Basic usage"
+            value={messageContent}
+            onChange={(e) => setMessageContent(e.target.value)}
+          />
           <Button onClick={send}>Send</Button>
         </Flex>
       </div>

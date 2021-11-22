@@ -7,12 +7,12 @@ const Lobby = () => {
 
   const socket = useContext(SocketContext);
 
-  const [members, setMembers] = useState([])
+  const [lobState, setLobState] = useState([])
   const [ident, setIdent] = useState({})
 
   useEffect(() => {
-    socket.on("members", mems => {
-      setMembers(mems)
+    socket.on("lobby:updateState", newLobState => {
+      setLobState(newLobState)
     })
 
     socket.on("set ident", function (newIdent) {
@@ -22,22 +22,22 @@ const Lobby = () => {
 
 
   function changeMode(newMode) {
-    socket.emit("change mode", newMode)
+    socket.emit("modeChange", newMode)
   }
   
-  if (ident.mode == "lob") {
+  if (ident.mode == "lobby") {
     return <Container>
-    <Heading size='lg'>RallyChat Lobby ({members.length})</Heading>
+    <Heading size='lg'>RallyChat Lobby ({lobState.userCount})</Heading>
     <Flex direction="column">
-      <Heading size="md">Hello, {ident.emoji}, {ident.mode}</Heading>
-      <Button my="2" onClick={() => changeMode("gc")}>Big 'ol Group Chat</Button>
+      <Heading size="md">Hello, {ident.emoji}</Heading>
+      <Button my="2" onClick={() => changeMode("anarchy")}>Big 'ol Group Chat</Button>
       <Button my="2" onClick={() => changeMode("11")}>One-on-one Chat</Button>
       <Button my="2" onClick={() => changeMode("ss")}>Secret Surresh</Button>
     </Flex>
   </Container>
   }
 
-  if (ident.mode == "gc") {
+  if (ident.mode == "anarchy") {
     return <Anarchy ident={ident} />
   }
 
