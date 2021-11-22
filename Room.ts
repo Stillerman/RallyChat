@@ -8,7 +8,7 @@ export class Room {
   constructor(io: Server, id: string) {
     this.io = io;
     this.id = id;
-    this.state = {};
+    this.state = {roomId: id};
   }
 
   updateState(dState: any) {

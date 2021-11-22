@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import { OOOManager } from "./OOOManager";
 import { Room } from "./Room";
 import { createUser, User } from "./User";
 
@@ -36,14 +37,14 @@ export class Adapter {
   io: Server;
   lobby: Room;
   anarchyChat: Room;
-  oooRooms: Room[];
+  oooManager: OOOManager;
   users: { [id: string]: User };
 
   constructor(io: Server) {
     this.io = io;
     this.lobby = new Room(io, "lobby");
     this.anarchyChat = new Room(io, "anarchy");
-    this.oooRooms = [];
+    this.oooManager = new OOOManager(io);
     this.users = {};
 
     this.io.on("connection", (socket) => {
@@ -52,8 +53,8 @@ export class Adapter {
         userCount: (this.lobby.state.userCount || 0) + 1,
       });
 
-      this.users[socket.id] = createUser(socket.id)
-      socket.emit("set ident", this.users[socket.id])
+      this.users[socket.id] = createUser(socket.id);
+      socket.emit("set ident", this.users[socket.id]);
 
       socket.on("modeChange", (newMode) => {
         // Lobby to Anarchy
@@ -63,8 +64,8 @@ export class Adapter {
             userCount: (this.lobby.state.userCount || 0) - 1,
           });
 
-          this.users[socket.id].mode = "anarchy"
-          socket.emit("set ident", this.users[socket.id])
+          this.users[socket.id].mode = "anarchy";
+          socket.emit("set ident", this.users[socket.id]);
 
           this.anarchyChat.enter(socket);
 
@@ -99,36 +100,62 @@ export class Adapter {
             userCount: (this.anarchyChat.state.userCount || 0) + 1,
           });
 
-          this.users[socket.id].mode = "lobby"
-          socket.emit("set ident", this.users[socket.id])
+          this.users[socket.id].mode = "lobby";
+          socket.emit("set ident", this.users[socket.id]);
+        }
+
+        // Lobby to OOO
+        if (this.users[socket.id].mode == "lobby" && newMode == "ooo") {
+          this.lobby.leave(socket);
+          this.lobby.updateState({
+            userCount: (this.lobby.state.userCount || 0) - 1,
+          });
+
+          this.users[socket.id].mode = "ooo";
+          socket.emit("set ident", this.users[socket.id]);
+
+          this.oooManager.enter(socket);
+        }
+
+        // OOO to Lobby
+        if (this.users[socket.id].mode == "ooo" && newMode == "lobby") {
+          this.oooManager.leave(socket);
+
+          this.users[socket.id].mode = "ooo";
+          socket.emit("set ident", this.users[socket.id]);
+
+          this.lobby.enter(socket);
+          this.lobby.updateState({
+            userCount: (this.lobby.state.userCount || 0) - 1,
+          });
         }
       });
 
-      socket.on("anarchy:send_msg", msg => {
-        if(this.users[socket.id].mode == "anarchy") {
+      socket.on("anarchy:send_msg", (msg) => {
+        if (this.users[socket.id].mode == "anarchy") {
           this.anarchyChat.updateState({
             events: [
               ...this.anarchyChat.state.events,
               {
                 type: "message",
                 user: this.users[socket.id].emoji,
-                message: msg
+                message: msg,
               },
             ],
-          })
+          });
         }
-      })
+      });
 
       socket.on("disconnect", () => {
-        if(this.users[socket.id].mode == "lobby") {
-          this.lobby.leave(socket)
+        if (this.users[socket.id].mode == "lobby") {
+          this.lobby.leave(socket);
           this.lobby.updateState({
             userCount: (this.lobby.state.userCount || 0) - 1,
           });
         }
 
-        if(this.users[socket.id].mode == "anarchy") {
-          this.anarchyChat.leave(socket)
+        if (this.users[socket.id].mode == "anarchy") {
+          this.anarchyChat.leave(socket);
           this.anarchyChat.updateState({
             userCount: (this.anarchyChat.state.userCount || 0) - 1,
             events: [
@@ -140,7 +167,7 @@ export class Adapter {
             ],
           });
         }
-      })
+      });
     });
   }
 }

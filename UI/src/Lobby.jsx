@@ -2,6 +2,7 @@ import { Button, Container, Heading, Flex } from "@chakra-ui/react"
 import { useContext, useState, useEffect } from "react";
 import { SocketContext } from "./context/socket";
 import Anarchy from './Anarchy'
+import OOO from './OOO'
 
 const Lobby = () => {
 
@@ -31,7 +32,7 @@ const Lobby = () => {
     <Flex direction="column">
       <Heading size="md">Hello, {ident.emoji}</Heading>
       <Button my="2" onClick={() => changeMode("anarchy")}>Big 'ol Group Chat</Button>
-      <Button my="2" onClick={() => changeMode("11")}>One-on-one Chat</Button>
+      <Button my="2" onClick={() => changeMode("ooo")}>One-on-one Chat</Button>
       <Button my="2" onClick={() => changeMode("ss")}>Secret Surresh</Button>
     </Flex>
   </Container>
@@ -39,6 +40,10 @@ const Lobby = () => {
 
   if (ident.mode == "anarchy") {
     return <Anarchy ident={ident} />
+  }
+
+  if (ident.mode == "ooo") {
+    return <OOO ident={ident} />
   }
 
   else {
