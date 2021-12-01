@@ -11,5 +11,6 @@ Currently in early development, RallyChat is a real time application powered by 
 1. Clone the resposity.
 2. Run `yarn install` in both the root folder and the `UI` folder.
 3. Run `yarn build` in both the root folder and the `UI` folder.
-4. Navigate to `localhost:3000`.
-5. Done.
+4. Run `node index.js` in the newly created `dist` folder (not `UI/dist`)
+5. Navigate to `localhost:3000`.
+6. Done.
